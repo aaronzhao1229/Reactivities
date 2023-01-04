@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Persistence;
 using API.Extensions;
 
+// create a server
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -11,7 +12,7 @@ builder.Services.AddApplicationServices(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline (middleware)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

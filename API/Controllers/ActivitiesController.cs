@@ -1,7 +1,4 @@
-using Persistence;
-using MediatR;
 using Domain;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Application.Acitivites;
 namespace API.Controllers
