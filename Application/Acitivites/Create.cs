@@ -1,4 +1,6 @@
+using Application.Core;
 using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 
@@ -6,25 +8,37 @@ namespace Application.Acitivites
 {
   public class Create
     {
-        public class Command : IRequest  // command doesn't return a value, while Query returns a value
+        public class Command : IRequest<Result<Unit>>  // command doesn't return a value, while Query returns a value
         {
           public Activity Activity { get; set; }
         }
 
-    public class Handler : IRequestHandler<Command>
-    {
-    private readonly DataContext _context;
-      public Handler(DataContext context)
-      {
-          _context = context;
-      }
+        public class CommandValidator : AbstractValidator<Command>
+        {
+          public CommandValidator() 
+          {
+            RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
+          }
+          
+        }
 
-      public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
-      {
-        _context.Activities.Add(request.Activity); // adding the activity to the Activities in _context in memory, but not the database, so no need to add Async.
-        await _context.SaveChangesAsync();
-        return Unit.Value; // (basically return nothing)
-      }
-    }
+        public class Handler : IRequestHandler<Command, Result<Unit>>
+        {
+          private readonly DataContext _context;
+          public Handler(DataContext context)
+          {
+              _context = context;
+          }
+
+          public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+          {
+            _context.Activities.Add(request.Activity); // adding the activity to the Activities in _context in memory, but not the database, so no need to add Async.
+            var result = await _context.SaveChangesAsync() > 0;
+
+            if (!result) return Result<Unit>.Failure("Failed to create activity");
+
+            return Result<Unit>.Success(Unit.Value); // (basically return nothing)
+          }
+        }
   }
 }
