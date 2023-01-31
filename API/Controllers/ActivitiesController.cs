@@ -1,6 +1,8 @@
 using Domain;
 using Microsoft.AspNetCore.Mvc;
 using Application.Acitivites;
+using Microsoft.AspNetCore.Authorization;
+
 namespace API.Controllers
 {
   public class ActivitiesController : BaseApiController
