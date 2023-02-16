@@ -1,8 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Application.Profiles;
 
-
-namespace Domain
+namespace Application.Acitivites
 {
-  public class Activity
+    public class ActivityDto
     {
         public Guid Id { get; set; }
         public string Title { get; set; }
@@ -12,8 +16,7 @@ namespace Domain
         public string City { get; set; }
         public string Venue { get; set; }
         public bool IsCancelled { get; set; }
-
-        public ICollection<ActivityAttendee> Attendees { get; set; } = new List<ActivityAttendee>(); // make sure that we don't get a no reference when we try and add something to this collection
-
+        public string HostUsername { get; set; }
+        public ICollection<Profile> Attendees { get; set; }
     }
 }

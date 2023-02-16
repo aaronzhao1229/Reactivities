@@ -1,7 +1,9 @@
 using Application.Core;
+using Application.Interfaces;
 using Domain;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.Acitivites
@@ -25,15 +27,29 @@ namespace Application.Acitivites
         public class Handler : IRequestHandler<Command, Result<Unit>>
         {
           private readonly DataContext _context;
-          public Handler(DataContext context)
+          public IUserAccessor _userAccessor;
+          public Handler(DataContext context, IUserAccessor userAccessor)
           {
+              _userAccessor = userAccessor;
               _context = context;
           }
 
           public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
-          {
+          { 
+            // even though we're using identity we can still access the user's table from our dbcontext, we do not need to bring in the user manager to go and get access to a user 
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.UserName == _userAccessor.GetUsername());
+
+            var attendee = new ActivityAttendee
+            {
+              AppUser = user,
+              Activity = request.Activity,
+              IsHost = true,
+            };
+
+            request.Activity.Attendees.Add(attendee);
+
             _context.Activities.Add(request.Activity); // adding the activity to the Activities in _context in memory, but not the database, so no need to add Async.
-            var result = await _context.SaveChangesAsync() > 0;
+            var result = await _context.SaveChangesAsync() > 0; // save changes
 
             if (!result) return Result<Unit>.Failure("Failed to create activity");
 

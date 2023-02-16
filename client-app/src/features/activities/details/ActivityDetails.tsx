@@ -17,6 +17,7 @@ export default observer(function ActivityDetails() {
   const {selectedActivity: activity, loadActivity, loadingInitial} = activityStore
   const {id} = useParams()
 
+
   useEffect(() => {
     if (id) loadActivity(id)
   }, [id, loadActivity])
@@ -31,7 +32,7 @@ export default observer(function ActivityDetails() {
         <ActivityDetailedChat />
       </Grid.Column>
       <Grid.Column width={6}>
-        <ActivityDetailedSidebar />
+        <ActivityDetailedSidebar activity={activity}/>
       </Grid.Column>
     </Grid>
   )
