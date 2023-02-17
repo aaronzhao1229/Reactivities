@@ -26,8 +26,13 @@ namespace API.Controllers   // we don't want this one to be an authenticated
         [AllowAnonymous] 
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
-        {
-          var user = await _userManager.FindByEmailAsync(loginDto.Email);
+        { 
+          // we need to include eager load the phots when we want to return a user DTO with an image. We don't have to do this for Resgister because there is no image for register, but we do need it for login.
+
+          // var user = await _userManager.FindByEmailAsync(loginDto.Email);
+          // there is no way to include or equally load if we're using one of the user managers find by methods. So we use the following
+          var user = await _userManager.Users.Include(p => p.Photos).FirstOrDefaultAsync(x => x.Email == loginDto.Email); // we should have the photo available to return after a user logs in. We need to do the same for the getcurrentuser method.
+
 
           if (user == null) return Unauthorized();
 
@@ -80,7 +85,8 @@ namespace API.Controllers   // we don't want this one to be an authenticated
     [HttpGet]
         public async Task<ActionResult<UserDto>> GetCurrentUser() 
         {
-          var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email)); // get the email claim from the token that we present to the API server
+          var user = await _userManager.Users.Include(p => p.Photos).FirstOrDefaultAsync(x => x.Email == User.FindFirstValue(ClaimTypes.Email));
+          // var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email)); // get the email claim from the token that we present to the API server
 
           // create a new user DTO based on the information contained inside that user above
           return CreateUserObject(user);
@@ -90,7 +96,7 @@ namespace API.Controllers   // we don't want this one to be an authenticated
       return new UserDto
       {
         DisplayName = user.DisplayName,
-        Image = null,
+        Image = user?.Photos?.FirstOrDefault(x => x.IsMain)?.Url, // adding these question marks should keep us safe from getting an error when we're trying to return the image.
         Token = _tokenService.CreateToken(user),
         Username = user.UserName
       };
