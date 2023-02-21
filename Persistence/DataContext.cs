@@ -18,6 +18,8 @@ namespace Persistence
 
     public DbSet<ActivityAttendee> ActivityAttendees { get; set; }  // for the occasion where we just want to get an attendee without needing to get the activity object as well
 
+    public DbSet<Photo> Photos { get; set; }  // just in case we need to query the photo collection directly from our data context.
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
       base.OnModelCreating(builder);
